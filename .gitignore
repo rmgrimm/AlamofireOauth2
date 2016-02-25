@@ -1,6 +1,6 @@
-
-
 Pods/
 *.xcuserstate
-AlamofireOauth2.xcworkspace/xcuserdata*
-
+*.xcuserdatad/
+*.xcodeproj/*.xcworkspace
+*.xccheckout
+*.xcscmblueprint
