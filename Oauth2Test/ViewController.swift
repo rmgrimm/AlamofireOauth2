@@ -15,44 +15,44 @@ class ViewController: UIViewController {
     
     @IBAction func startWordpressOauth2Test(sender: AnyObject) {
         self.result.text = ""
-        UsingOauth2(wordpressOauth2Settings, performWithToken: { token in
-            WordPressRequestConvertible.OAuthToken = token
-            Alamofire.request(WordPressRequestConvertible.Me())
-                .responseJSON(completionHandler: { (result) -> Void in
-                    if let data = result.data {
-                        let response = NSString(data: data, encoding: NSUTF8StringEncoding)
-                        self.result.text = "\(response)"
-                        print("JSON = \(response)")
-                        
-                    }
-                })
-        }, errorHandler: {
+        UsingOAuth2(wordpressOauth2Settings, errorHandler: { error in
             print("Oauth2 failed")
-        })
+            }) { token in
+                WordPressRequestConvertible.OAuthToken = token
+                Alamofire.request(WordPressRequestConvertible.Me())
+                    .responseJSON(completionHandler: { (result) -> Void in
+                        if let data = result.data {
+                            let response = NSString(data: data, encoding: NSUTF8StringEncoding)
+                            self.result.text = "\(response)"
+                            print("JSON = \(response)")
+
+                        }
+                    })
+        }
     }
 
     @IBAction func startGoogleOauth2Test(sender: AnyObject) {
         self.result.text = ""
-        UsingOauth2(googleOauth2Settings, performWithToken: { token in
-            GoogleRequestConvertible.OAuthToken = token
-            Alamofire.request(GoogleRequestConvertible.Me())
-            .responseJSON(completionHandler: { (result) -> Void in
-                if let data = result.data {
-                    let response = NSString(data: data, encoding: NSUTF8StringEncoding)
-                    self.result.text = "\(response)"
-                    print("JSON = \(response)")
-
-                }
-                
-            })
-        }, errorHandler: {
+        UsingOAuth2(googleOauth2Settings,  errorHandler: { error in
             print("Oauth2 failed")
-        })
+            }) { token in
+                GoogleRequestConvertible.OAuthToken = token
+                Alamofire.request(GoogleRequestConvertible.Me())
+                    .responseJSON(completionHandler: { (result) -> Void in
+                        if let data = result.data {
+                            let response = NSString(data: data, encoding: NSUTF8StringEncoding)
+                            self.result.text = "\(response)"
+                            print("JSON = \(response)")
+
+                        }
+                        
+                    })
+        }
     }
     
     @IBAction func clearTokens(sender: AnyObject) {
-        Oauth2ClearTokensFromKeychain(wordpressOauth2Settings)
-        Oauth2ClearTokensFromKeychain(googleOauth2Settings)
+        OAuth2ClearTokensFromKeychain(wordpressOauth2Settings)
+        OAuth2ClearTokensFromKeychain(googleOauth2Settings)
     }
 }
 
@@ -63,13 +63,14 @@ class ViewController: UIViewController {
 
 
 // Create your own clientID and clientSecret at https://developer.wordpress.com/docs/oauth2/
-let wordpressOauth2Settings = Oauth2Settings(
+let wordpressOauth2Settings = OAuth2Settings(
     baseURL: "https://public-api.wordpress.com/rest/v1",
     authorizeURL: "https://public-api.wordpress.com/oauth2/authorize",
     tokenURL: "https://public-api.wordpress.com/oauth2/token",
     redirectURL: "http://evict.nl",
     clientID: "41739",
-    clientSecret: "31eC5no1cKXH3RS8sKfjv9WEpHiyvl24jvx0iXXwqc4Dajhq9OeAgRDazVoHtKtq"
+    clientSecret: "31eC5no1cKXH3RS8sKfjv9WEpHiyvl24jvx0iXXwqc4Dajhq9OeAgRDazVoHtKtq",
+    scope: ""
 )
 
 // Minimal Alamofire implementation. For more info see https://github.com/Alamofire/Alamofire#crud--authorization
@@ -99,7 +100,7 @@ public enum WordPressRequestConvertible: URLRequestConvertible {
 // Create your own clientID at https://console.developers.google.com/project (secret can be left blank!)
 // For more info see https://developers.google.com/identity/protocols/OAuth2WebServer#handlingtheresponse
 // And https://developers.google.com/+/web/api/rest/oauth
-let googleOauth2Settings = Oauth2Settings(
+let googleOauth2Settings = OAuth2Settings(
     baseURL: "https://www.googleapis.com/plus/v1",
     authorizeURL: "https://accounts.google.com/o/oauth2/auth",
     tokenURL: "https://www.googleapis.com/oauth2/v3/token",
