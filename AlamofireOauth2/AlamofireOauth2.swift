@@ -3,7 +3,7 @@ import Foundation
 import UIKit
 import KeychainAccess
 
-public func UsingOauth2(settings: Oauth2Settings?, performWithToken: (token: String) -> (), errorHandler: () -> () ) {
+public func UsingOauth2(settings: OAuth2Settings?, performWithToken: (token: String) -> (), errorHandler: () -> () ) {
     if settings == nil {
         print("ERROR: No Oauth2 settings provided")
         errorHandler()
@@ -15,16 +15,16 @@ public func UsingOauth2(settings: Oauth2Settings?, performWithToken: (token: Str
             if authToken != "" {
                 print("Received access token " + optionnalAuthToken)
                 performWithToken(token: optionnalAuthToken)
-                return                
+                return
             }
         }
         print("ERROR: Unable to get access token ")
         errorHandler()
-        
+
     })
 }
 
-public func Oauth2ClearTokensFromKeychain(settings: Oauth2Settings) {
+public func Oauth2ClearTokensFromKeychain(settings: OAuth2Settings) {
     let keychain = Keychain(service: settings.baseURL)
     keychain[kOAuth2AccessTokenService] = nil
     keychain[kOAuth2RefreshTokenService] = nil
