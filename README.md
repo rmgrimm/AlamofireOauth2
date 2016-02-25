@@ -8,7 +8,7 @@ A Swift implementation of OAuth2 for iOS using Alamofire.
 [![Build Status](https://travis-ci.org/evermeer/AlamofireOauth2.svg?style=flat)](https://travis-ci.org/evermeer/AlamofireOauth2)
 [![Issues](https://img.shields.io/github/issues-raw/evermeer/AlamofireOauth2.svg?style=flat)](https://github.com/evermeer/AlamofireOauth2/issues)
 [![Stars](https://img.shields.io/github/stars/evermeer/AlamofireOauth2.svg?style=flat)](https://github.com/evermeer/AlamofireOauth2/stargazers)
-[![Version](https://img.shields.io/cocoapods/v/AlamofireOauth2.svg?style=flat)](http://cocoadocs.org/docsets/EVReflection)
+[![Version](https://img.shields.io/cocoapods/v/AlamofireOauth2.svg?style=flat)](http://cocoadocs.org/docsets/AlamofireOauth2)
 [![License](https://img.shields.io/cocoapods/l/AlamofireOauth2.svg?style=flat)](http://cocoadocs.org/docsets/AlamofireOauth2)
 [![Platform](https://img.shields.io/cocoapods/p/AlamofireOauth2.svg?style=flat)](http://cocoadocs.org/docsets/AlamofireOauth2)
 
@@ -16,7 +16,7 @@ A Swift implementation of OAuth2 for iOS using Alamofire.
 [![Twitter](https://img.shields.io/badge/twitter-@evermeer-blue.svg?style=flat)](http://twitter.com/evermeer)
 [![LinkedIn](https://img.shields.io/badge/linkedin-Edwin Vermeer-blue.svg?style=flat)](http://nl.linkedin.com/in/evermeer/en)
 [![Website](https://img.shields.io/badge/website-evict.nl-blue.svg?style=flat)](http://evict.nl)
-[![eMail](https://img.shields.io/badge/email-edwin@evict.nl-blue.svg?style=flat)](mailto:edwin@evict.nl?SUBJECT=About EVReflection)
+[![eMail](https://img.shields.io/badge/email-edwin@evict.nl-blue.svg?style=flat)](mailto:edwin@evict.nl?SUBJECT=About AlamofireOauth2)
 
 
 #Intro
@@ -26,9 +26,9 @@ This library is heavilly inspired by the [SwiftOAuth2 repository from crousselle
 AlamofireOauth2 relies on [Alamofire](https://github.com/Alamofire/Alamofire), and [KeychainAccess](https://github.com/kishikawakatsumi/KeychainAccess)
 
 
-## Using AlamofireOauth2 in your own App 
+## Using AlamofireOauth2 in your own App
 
-'AlamofireOauth2' is now available through the dependency manager [CocoaPods](http://cocoapods.org). 
+'AlamofireOauth2' is now available through the dependency manager [CocoaPods](http://cocoapods.org).
 You do have to use cocoapods version 0.36. At this moment this can be installed by executing:
 
 ```
@@ -69,7 +69,7 @@ pod install
 
 3) Open the `AlamofireOauth.xcworkspace` in Xcode and.
 
-4) Create your own clientID and clientSecret at https://developer.wordpress.com/docs/oauth2/ 
+4) Create your own clientID and clientSecret at https://developer.wordpress.com/docs/oauth2/
 
 5) set the clientID and clientSecret in the wordpressOauth2Settings object in the ViewController
 
@@ -86,27 +86,32 @@ class ViewController: UIViewController {
 
     @IBAction func startWordpressOauth2Test(sender: AnyObject) {
         self.result.text = ""
-        UsingOauth2(wordpressOauth2Settings, self, { token in
-            WordPressRequestConvertible.OAuthToken = token
-            Alamofire.request(WordPressRequestConvertible.Me())
-                .responseJSON { (request, response, json, error ) -> Void in
-                self.result.text = "\(json)"
-                println("JSON = \(json)")
-            }
-        }, {
-            println("Oauth2 failed")
-        })
+        UsingOAuth2(wordpressOauth2Settings, errorHandler: { error in
+            print("Oauth2 failed")
+            }) { token in
+                WordPressRequestConvertible.OAuthToken = token
+                Alamofire.request(WordPressRequestConvertible.Me())
+                    .responseJSON(completionHandler: { (result) -> Void in
+                        if let data = result.data {
+                            let response = NSString(data: data, encoding: NSUTF8StringEncoding)
+                            self.result.text = "\(response)"
+                            print("JSON = \(response)")
+
+                        }
+                    })
+        }
     }
 }
 
 // Create your own clientID and clientSecret at https://developer.wordpress.com/docs/oauth2/
-let wordpressOauth2Settings = Oauth2Settings(
+let wordpressOauth2Settings = OAuth2Settings(
     baseURL: "https://public-api.wordpress.com/rest/v1",
     authorizeURL: "https://public-api.wordpress.com/oauth2/authorize",
     tokenURL: "https://public-api.wordpress.com/oauth2/token",
-    redirectURL: "alamofireoauth2://wordpress/oauth_callback",
+    redirectURL: "http://evict.nl",
     clientID: "????????????",
-    clientSecret: "????????????"
+    clientSecret: "????????????",
+    scope: ""
 )
 
 // Minimal Alamofire implementation. For more info see https://github.com/Alamofire/Alamofire#crud--authorization
@@ -116,7 +121,7 @@ public enum WordPressRequestConvertible: URLRequestConvertible {
 
     case Me()
 
-    public var URLRequest: NSURLRequest {
+    public var URLRequest: NSMutableURLRequest { get {
         let URL = NSURL(string: WordPressRequestConvertible.baseURLString!)!
         let mutableURLRequest = NSMutableURLRequest(URL: URL.URLByAppendingPathComponent("/me"))
         mutableURLRequest.HTTPMethod = "GET"
@@ -126,6 +131,7 @@ public enum WordPressRequestConvertible: URLRequestConvertible {
         }
 
         return mutableURLRequest
+        }
     }
 }
 ```
@@ -136,7 +142,7 @@ AlamofireOauth2 is available under the MIT 3 license. See the LICENSE file for m
 ## My other libraries:
 Also see my other open source iOS libraries:
 
-- [EVReflection](https://github.com/evermeer/EVReflection) - Swift library with reflection functions with support for NSCoding, Printable, Hashable, Equatable and JSON 
+- [EVReflection](https://github.com/evermeer/EVReflection) - Swift library with reflection functions with support for NSCoding, Printable, Hashable, Equatable and JSON
 - [EVCloudKitDao](https://github.com/evermeer/EVCloudKitDao) - Simplified access to Apple's CloudKit
 - [EVFaceTracker](https://github.com/evermeer/EVFaceTracker) - Calculate the distance and angle of your device with regards to your face in order to simulate a 3D effect
 - [EVURLCache](https://github.com/evermeer/EVURLCache) - a NSURLCache subclass for handling all web requests that use NSURLReques
