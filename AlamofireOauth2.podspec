@@ -52,7 +52,7 @@ s.platform     = :ios, "8.0"
 #  Supports git, hg, bzr, svn and HTTP.
 #
 
-s.source       = { :git => "https://github.com/evermeer/SwiftOauth2.git", :tag => s.version.to_s }
+s.source       = { :git => "https://github.com/evermeer/AlamofireOauth2.git", :tag => s.version.to_s }
 
 # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 #
@@ -70,7 +70,7 @@ s.source_files  = 'AlamofireOauth2/*'
 #  the lib prefix of their name.
 #
 
-s.frameworks = "Foundation", "UIKit", "CloudKit"
+s.frameworks = "Foundation", "UIKit"
 
 # ――― Project Settings ――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 #
