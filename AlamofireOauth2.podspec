@@ -9,11 +9,11 @@ Pod::Spec.new do |s|
 
 s.name         = "AlamofireOauth2"
 s.version      = "1.1.2"
-s.summary      = "Oauth2 implementation using Alamofire"
+s.summary      = "OAuth2 client implementation using Alamofire"
 
-s.description  = "A Swift implementation of Oauth2 using Alamofire"
+s.description  = "A Swift implementation of an OAuth2 client using the authorization_code grant type. Networking uses Alamofire"
 
-s.homepage     = "https://github.com/evermeer/AlamofireOauth2"
+s.homepage     = "https://github.com/rmgrimm/AlamofireOauth2"
 
 # ―――  Spec License  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 #
@@ -35,8 +35,8 @@ s.license      = { :type => "MIT", :file => "LICENSE" }
 #  profile URL.
 #
 
-s.author    = "evermeer"
-s.social_media_url   = "http://twitter.com/evermeer"
+s.author    = "rmgrimm"
+s.social_media_url   = "http://github.com/rmgrimm/AlamofireOauth2"
 
 # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 #
@@ -52,7 +52,7 @@ s.platform     = :ios, "8.0"
 #  Supports git, hg, bzr, svn and HTTP.
 #
 
-s.source       = { :git => "https://github.com/evermeer/SwiftOauth2.git", :tag => s.version.to_s }
+s.source       = { :git => "https://github.com/rmgrimm/AlamofireOauth2.git", :tag => s.version.to_s }
 
 # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 #
@@ -70,7 +70,7 @@ s.source_files  = 'AlamofireOauth2/*'
 #  the lib prefix of their name.
 #
 
-s.frameworks = "Foundation", "UIKit", "CloudKit"
+s.frameworks = "Foundation", "UIKit"
 
 # ――― Project Settings ――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 #
