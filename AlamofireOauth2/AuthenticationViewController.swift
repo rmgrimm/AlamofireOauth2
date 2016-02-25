@@ -4,12 +4,12 @@ import UIKit
 
 class AuthenticationViewController : UIViewController, UIWebViewDelegate{
 
-    let expectedState:String = "authDone"
+    let expectedState : String = "authDone"
 
-    var webView: UIWebView?
+    var webView : UIWebView?
 
-    var successCallback : ((code:String)-> Void)?
-    var failureCallback : ((error:NSError) -> Void)?
+    var successCallback : ((code: String)-> Void)?
+    var failureCallback : ((error: NSError) -> Void)?
 
     var isRetrievingAuthCode : Bool? = false
 
@@ -23,7 +23,7 @@ class AuthenticationViewController : UIViewController, UIWebViewDelegate{
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
 
-    init(oauth2Settings: OAuth2Settings, successCallback:((code:String)-> Void), failureCallback:((error:NSError) -> Void)) {
+    init(oauth2Settings: OAuth2Settings, successCallback: ((code:String)-> Void), failureCallback: ((error:NSError) -> Void)) {
         super.init(nibName: nil, bundle: nil)
 
         self.oauth2Settings = oauth2Settings
@@ -55,8 +55,8 @@ class AuthenticationViewController : UIViewController, UIWebViewDelegate{
         super.viewWillAppear(animated)
 
         // TO alter if more parameters needed
-        let url:String! = self.oauth2Settings.authorizeURL + "?response_type=code&client_id=" + self.oauth2Settings.clientID + "&redirect_uri=" + self.oauth2Settings.redirectURL.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())! + "&scope=" + self.oauth2Settings.scope + "&state=" + expectedState
-        let urlRequest : NSURLRequest = NSURLRequest(URL: NSURL(string: url)!)
+        let url = self.oauth2Settings.authorizeURL + "?response_type=code&client_id=" + self.oauth2Settings.clientID + "&redirect_uri=" + self.oauth2Settings.redirectURL.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())! + "&scope=" + self.oauth2Settings.scope + "&state=" + expectedState
+        let urlRequest = NSURLRequest(URL: NSURL(string: url)!)
 
         self.webView!.loadRequest(urlRequest)
     }
