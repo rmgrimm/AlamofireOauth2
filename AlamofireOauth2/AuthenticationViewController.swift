@@ -4,16 +4,16 @@ import UIKit
 
 class AuthenticationViewController : UIViewController, UIWebViewDelegate{
 
-    let expectedState:String = "authDone"
+    let expectedState : String = "authDone"
 
-    var webView: UIWebView?
+    weak var webView : UIWebView?
 
-    var successCallback : ((code:String)-> Void)?
-    var failureCallback : ((error:NSError) -> Void)?
+    var successCallback : ((code: String)-> Void)?
+    var failureCallback : ((error: NSError) -> Void)?
 
-    var isRetrievingAuthCode : Bool? = false
+    var isRetrievingAuthCode : Bool = false
 
-    var oauth2Settings: OAuth2Settings!
+    var oauth2Settings : OAuth2Settings!
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -23,8 +23,8 @@ class AuthenticationViewController : UIViewController, UIWebViewDelegate{
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
 
-    init(oauth2Settings: OAuth2Settings, successCallback:((code:String)-> Void), failureCallback:((error:NSError) -> Void)) {
-        super.init(nibName: nil, bundle: nil)
+    convenience init(oauth2Settings: OAuth2Settings, successCallback: ((code: String) -> Void), failureCallback: ((error: NSError) -> Void)) {
+        self.init(nibName: nil, bundle: nil)
 
         self.oauth2Settings = oauth2Settings
         self.successCallback = successCallback
@@ -32,98 +32,98 @@ class AuthenticationViewController : UIViewController, UIWebViewDelegate{
     }
 
     override func viewDidLoad() {
-
         super.viewDidLoad()
 
-        self.title = "Login"
+        title = "Login"
 
-        self.webView = UIWebView(frame: self.view.bounds);
+        let webView = UIWebView(frame: view.bounds)
+        self.webView = webView
 
-        if let bindCheck = self.webView {
-            bindCheck.backgroundColor = UIColor.clearColor()
-            bindCheck.scalesPageToFit = true
-            bindCheck.delegate = self
-            self.view.addSubview(bindCheck)
-        }
+        webView.backgroundColor = UIColor.clearColor()
+        webView.scalesPageToFit = true
+        webView.delegate = self
 
-        self.view.backgroundColor = UIColor.whiteColor()
+        view.addSubview(webView)
+        view.backgroundColor = UIColor.whiteColor()
 
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: Selector("cancelAction"))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: Selector("cancelAction"))
     }
 
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
 
         // TO alter if more parameters needed
-        let url:String! = self.oauth2Settings.authorizeURL + "?response_type=code&client_id=" + self.oauth2Settings.clientID + "&redirect_uri=" + self.oauth2Settings.redirectURL.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet())! + "&scope=" + self.oauth2Settings.scope + "&state=" + expectedState
-        let urlRequest : NSURLRequest = NSURLRequest(URL: NSURL(string: url)!)
+        let redirectURI = oauth2Settings.redirectURL.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!
+        let url = "\(oauth2Settings.authorizeURL)?response_type=code&client_id=\(oauth2Settings.clientID)&redirect_uri=\(redirectURI)&scope=\(oauth2Settings.scope)&state=\(expectedState)"
+        let urlRequest = NSURLRequest(URL: NSURL(string: url)!)
 
-        self.webView!.loadRequest(urlRequest)
+        webView?.loadRequest(urlRequest)
     }
-
 
     func cancelAction() {
-        self.dismissViewControllerAnimated(true, completion: nil)
+        dismissViewControllerAnimated(true, completion: nil)
     }
-
 
     func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
 
         let url : NSString = request.URL!.absoluteString
-        self.isRetrievingAuthCode = url.hasPrefix(self.oauth2Settings.redirectURL)
 
-        if (self.isRetrievingAuthCode!) {
-            if(url.rangeOfString("error").location != NSNotFound) {
-                let error:NSError = NSError(domain:"CROAuth2UnknownErrorDomain", code:0, userInfo: nil)
-                self.failureCallback!(error:error)
-            } else {
+        isRetrievingAuthCode = url.hasPrefix(oauth2Settings.redirectURL)
 
-                let optionnalState:String? = self.extractParameterFromUrl("state", url: url)
+        if isRetrievingAuthCode {
+            guard url.rangeOfString("error").location == NSNotFound else {
+                let error: NSError = NSError(domain: "CROAuth2UnknownErrorDomain", code: 0, userInfo: nil)
+                failureCallback?(error: error)
+                return true
+            }
 
-                if let state = optionnalState {
-                    if (state == expectedState) {
-
-                        let optionnalCode:String? = self.extractParameterFromUrl("code", url: url)
-                        if let code = optionnalCode {
-                            self.successCallback!(code:code)
-                        }
-                    }
-                }
+            if let state = extractParameterFromUrl("state", url: url) where state == expectedState,
+                let code = extractParameterFromUrl("code", url: url) {
+                    successCallback?(code: code)
             }
         }
 
         return true
-
     }
 
     func webView(webView: UIWebView, didFailLoadWithError error: NSError?) {
-        if (!self.isRetrievingAuthCode!) {
-            self.failureCallback!(error: error ?? NSError(domain: "Could not retreive auth code", code: 1, userInfo: nil))
+        if !isRetrievingAuthCode {
+            var userInfo : [String : AnyObject] = [
+                NSLocalizedDescriptionKey: "Could not retrieve auth code",
+                NSLocalizedFailureReasonErrorKey: "Could not retrieve auth code"
+            ]
+
+            if let error = error {
+                userInfo[NSUnderlyingErrorKey] = error
+            }
+
+            failureCallback?(error: NSError(domain: "OAuth2Client", code: 4, userInfo: userInfo))
         }
     }
 
 
-    func extractParameterFromUrl(parameterName:NSString, url:NSString) -> String? {
+    func extractParameterFromUrl(parameterName: String, url: NSString) -> String? {
 
-        if(url.rangeOfString("?").location == NSNotFound) {
+        guard url.rangeOfString("?").location != NSNotFound else {
             return nil
         }
 
-        if let urlString: String = url.componentsSeparatedByString("?")[1] {
-            var dict = Dictionary <String, String>()
+        let urlString = url.componentsSeparatedByString("?")[1]
+        var dict = [String: String]()
 
-            for param in urlString.componentsSeparatedByString("&") {
-                var array = Array <AnyObject>()
-                array = param.componentsSeparatedByString("=")
-                let name:String = array[0] as! String
-                let value:String = array[1] as! String
+        for param in urlString.componentsSeparatedByString("&") {
+            var array = param.componentsSeparatedByString("=")
 
-                dict[name] = value
-            }
-            if let result = dict[parameterName as String] {
-                return result
-            }
+            let name: String = array[0]
+            let value: String = array[1]
+
+            dict[name] = value
         }
+
+        if let result = dict[parameterName] {
+            return result
+        }
+
         return nil
     }
 }
